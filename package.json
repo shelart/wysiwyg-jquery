@@ -11,7 +11,7 @@
   ],
   "description": "jQuery-plugin-wrapper for wysiwyg-js",
   "author": "shelart",
-  "license": "Apache 2.0",
+  "license": "Apache-2.0",
   "main": "src/js/makeWysiwyg.js",
   "repository": {
     "type": "git",
