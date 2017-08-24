@@ -1,6 +1,7 @@
 /*global $, require, module*/
 var wysiwyg = require('wysiwyg-js');
 var wysiwygEditor = require('./wysiwyg-editor');
+require('../css/wysiwyg-editor.css');
 
 var makeWysisyg = function($wysiwyg) {
     $wysiwyg.wysiwyg = wysiwygEditor;
