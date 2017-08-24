@@ -18,11 +18,11 @@
     "url": "https://github.com/shelart/wysiwyg-jquery"
   },
   "dependencies": {
-    "font-awesome": "^4.7.0",
     "uuid": "^3.1.0",
     "wysiwyg-js": "^0.1.0"
   },
   "peerDependencies": {
-    "jquery": "*"
+    "jquery": "*",
+    "font-awesome": "^4.7.0"
   }
 }
