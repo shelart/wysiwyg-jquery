@@ -1,0 +1,27 @@
+{
+  "name": "wysiwyg-jquery",
+  "version": "0.1.0",
+  "keywords": [
+    "wysiwyg",
+    "contenteditable",
+    "editor",
+    "rich editor",
+    "rich text editor",
+    "jquery"
+  ],
+  "description": "jQuery-plugin-wrapper for wysiwyg-js",
+  "author": "shelart",
+  "license": "Apache 2.0",
+  "main": "src/js/makeWysiwyg.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shelart/wysiwyg-jquery"
+  },
+  "dependencies": {
+    "font-awesome": "^4.7.0",
+    "wysiwyg-js": "^0.1.0"
+  },
+  "peerDependencies": {
+    "jquery": "*"
+  }
+}
