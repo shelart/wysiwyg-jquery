@@ -1,6 +1,8 @@
 /*global $, require, module*/
 var wysiwyg = require('wysiwyg-js');
 require('./wysiwyg-editor');
+var uuid = require('uuid/v4');
+var popups = require('./wysiwyg-editor.customPopups');
 require('../css/wysiwyg-editor.css');
 
 var makeWysisyg = function($wysiwyg) {
@@ -161,7 +163,7 @@ var makeWysisyg = function($wysiwyg) {
                 title: 'Цвет текста',
                 image: '\uf1fc',
                 popup: function($popup, $button) {
-                    $popup.append(openColorPalette(function(color) {
+                    $popup.append(popups.openColorPalette(function(color) {
                         $wysiwyg.wysiwyg('shell').forecolor(color).closePopup().collapseSelection();
                         wysiwygReplaceTag($wysiwyg, "font[color]", "span", function($result) {
                             $result.css('color', color);
@@ -207,10 +209,10 @@ var makeWysisyg = function($wysiwyg) {
                         oldTarget = "";
                     }
 
-                    $popup.append(openLinkConverter(function(href, target) {
+                    $popup.append(popups.openLinkConverter(function(href, target) {
                         var dummyHref;
                         do {
-                            dummyHref = randomString(10, 10);
+                            dummyHref = uuid();
                         } while ($wysiwyg.wysiwyg('container').find("a[href='" + dummyHref + "']").length);
 
                         $wysiwyg.wysiwyg('shell').insertLink(dummyHref).closePopup();
@@ -242,10 +244,10 @@ var makeWysisyg = function($wysiwyg) {
                 title: 'Вставить картинку',
                 image: '\uf030',
                 popup: function($popup, $button) {
-                    $popup.append(openImageInserter(function(src) {
+                    $popup.append(popups.openImageInserter(function(src) {
                         var dummySrc;
                         do {
-                            dummySrc = randomString(10, 10);
+                            dummySrc = uuid();
                         } while ($wysiwyg.wysiwyg('container').find("img[src='" + dummySrc + "']").length);
 
                         $wysiwyg.wysiwyg('shell').insertImage(dummySrc).closePopup();
@@ -268,10 +270,10 @@ var makeWysisyg = function($wysiwyg) {
                 title: 'Сделать ссылкой на файл',
                 image: '\uf15b',
                 popup: function($popup, $button) {
-                    $popup.append(openFileLinkMaker(function(href, target) {
+                    $popup.append(popups.openFileLinkMaker(function(href, target) {
                         var dummyHref;
                         do {
-                            dummyHref = randomString(10, 10);
+                            dummyHref = uuid();
                         } while ($wysiwyg.wysiwyg('container').find("a[href='" + dummyHref + "']").length);
 
                         $wysiwyg.wysiwyg('shell').insertLink(dummyHref).closePopup();
@@ -340,7 +342,7 @@ var makeWysisyg = function($wysiwyg) {
             // You have to submit the form into an '<iframe/>' element.
             // Call 'insert_image(url)' as soon as the file is online
             // and the URL is available.
-            var iframe_name = 'legacy-uploader-' + Math.random().toString(36).substring(2);
+            var iframe_name = 'legacy-uploader-' + uuid();
             $('<iframe>')
                 .attr('name', iframe_name)
                 .load(function() {

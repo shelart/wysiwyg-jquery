@@ -1,3 +1,5 @@
+/*global $, require, module*/
+
 /** @return String */
 function HSVtoRGB( h, s, v )
 {
@@ -488,3 +490,11 @@ function openImageInserter(funcOnSave, funcOnCancel) {
 
     return $form;
 }
+
+module.exports = {
+    HSVtoRGB: HSVtoRGB,
+    openColorPalette: openColorPalette,
+    openLinkConverter: openLinkConverter,
+    openFileLinkMaker: openFileLinkMaker,
+    openImageInserter: openImageInserter
+};
