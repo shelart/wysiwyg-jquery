@@ -1,29 +1,78 @@
 /*global $, require, module*/
-var $ = require('jquery');
 var wysiwyg = require('wysiwyg-js');
 var wysiwygEditor = require('./wysiwyg-editor');
-//wysiwygEditor(window, document, $);
 
-function makeWysisyg($wysiwyg) {
-    function wysiwygBold($wysiwyg) {
+var makeWysisyg = function($wysiwyg) {
+    $wysiwyg.wysiwyg = wysiwygEditor;
+
+    var nextNode = function(node) {
+        if (node.hasChildNodes()) {
+            return node.firstChild;
+        } else {
+            while (node && !node.nextSibling) {
+                node = node.parentNode;
+            }
+            if (!node) {
+                return null;
+            }
+            return node.nextSibling;
+        }
+    };
+
+    var getRangeSelectedNodes = function(range) {
+        var node = range.startContainer;
+        var endNode = range.endContainer;
+
+        // Special case for a range that is contained within a single node
+        if (node == endNode) {
+            return [node];
+        }
+
+        // Iterate nodes until we hit the end container
+        var rangeNodes = [];
+        while (node && node != endNode) {
+            rangeNodes.push( node = nextNode(node) );
+        }
+
+        // Add partially selected nodes at the start of the range
+        node = range.startContainer;
+        while (node && node != range.commonAncestorContainer) {
+            rangeNodes.unshift(node);
+            node = node.parentNode;
+        }
+
+        return rangeNodes;
+    };
+
+    var getSelectedNodes = function() {
+        if (window.getSelection) {
+            var sel = window.getSelection();
+            if (!sel.isCollapsed) {
+                return getRangeSelectedNodes(sel.getRangeAt(0));
+            }
+        }
+        return [];
+    };
+
+    var wysiwygBold = function($wysiwyg) {
         $wysiwyg.wysiwyg('shell').bold();
         wysiwygReplaceTag($wysiwyg, "b", "strong");
         window.edited = true;
-    }
+    };
 
-    function wysiwygItalic($wysiwyg) {
+    var wysiwygItalic = function($wysiwyg) {
         $wysiwyg.wysiwyg('shell').italic();
         wysiwygReplaceTag($wysiwyg, "i", "em");
         window.edited = true;
-    }
+    };
 
-    function wysiwygUnlink($wysiwyg) {
+    var wysiwygUnlink = function($wysiwyg) {
         document.execCommand('unlink', false, false);
         $wysiwyg.wysiwyg('shell').sync();
         window.edited = true;
-    }
+    };
 
-    function wysiwygReplaceTag($wysiwyg, oldSelector, newTag, processFunc) {
+    var wysiwygReplaceTag = function($wysiwyg, oldSelector, newTag, processFunc) {
         $wysiwyg
             .wysiwyg('container')
             .find(oldSelector)
@@ -38,10 +87,10 @@ function makeWysisyg($wysiwyg) {
                 return $result;
             });
         window.edited = true;
-    }
+    };
 
     // http://stackoverflow.com/a/6691294
-    function placeHtmlAtCaret(html, selectPastedContent) {
+    var placeHtmlAtCaret = function(html, selectPastedContent) {
         var sel, range;
         if (window.getSelection) {
             // IE9 and non-IE
@@ -86,7 +135,7 @@ function makeWysisyg($wysiwyg) {
                 range.select();
             }
         }
-    }
+    };
 
     $wysiwyg.wysiwyg({
         toolbar: "top-selection",
@@ -490,55 +539,6 @@ function makeWysisyg($wysiwyg) {
         window.edited = true;
         e.preventDefault();
     });
-
-    function nextNode(node) {
-        if (node.hasChildNodes()) {
-            return node.firstChild;
-        } else {
-            while (node && !node.nextSibling) {
-                node = node.parentNode;
-            }
-            if (!node) {
-                return null;
-            }
-            return node.nextSibling;
-        }
-    }
-
-    function getRangeSelectedNodes(range) {
-        var node = range.startContainer;
-        var endNode = range.endContainer;
-
-        // Special case for a range that is contained within a single node
-        if (node == endNode) {
-            return [node];
-        }
-
-        // Iterate nodes until we hit the end container
-        var rangeNodes = [];
-        while (node && node != endNode) {
-            rangeNodes.push( node = nextNode(node) );
-        }
-
-        // Add partially selected nodes at the start of the range
-        node = range.startContainer;
-        while (node && node != range.commonAncestorContainer) {
-            rangeNodes.unshift(node);
-            node = node.parentNode;
-        }
-
-        return rangeNodes;
-    }
-
-    function getSelectedNodes() {
-        if (window.getSelection) {
-            var sel = window.getSelection();
-            if (!sel.isCollapsed) {
-                return getRangeSelectedNodes(sel.getRangeAt(0));
-            }
-        }
-        return [];
-    }
-}
+};
 
 module.exports = makeWysisyg;
