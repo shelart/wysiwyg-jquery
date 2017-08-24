@@ -264,66 +264,6 @@ var makeWysisyg = function($wysiwyg) {
                 showstatic: true,
                 showselection: false
             },
-            insertJournalUpdatePane: {
-                title: 'Вставить журнальную плашку',
-                image: 'Ж',
-                popup: function($popup, $button) {
-                    $popup.append(openJournalUpdatePaneInserter(function($div) {
-                        var dummySrc;
-                        do {
-                            dummySrc = randomString(10, 10);
-                        } while ($wysiwyg.wysiwyg('container').find("img[src='" + dummySrc + "']").length);
-
-                        $wysiwyg.wysiwyg('shell').insertImage(dummySrc).closePopup();
-
-                        var $image = $wysiwyg
-                            .wysiwyg('container')
-                            .find("img[src='" + dummySrc + "']");
-
-                        $div.insertAfter($image);
-                        $image.remove();
-                        if (!$div.parent().is('#contents')) {
-                            $div.appendTo($('#contents'));
-                        }
-                        var $p = $('<p><br /></p>').insertAfter($div);
-                        var p = $p.get(0);
-                        var br = p.firstChild;
-
-                        if (window.getSelection) {
-                            var sel = window.getSelection();
-                            if (sel.getRangeAt && sel.rangeCount) {
-                                var range = document.createRange();
-                                range.setStart(br, 0);
-                                range.setEnd(br, 0);
-                                sel.removeAllRanges();
-                                sel.addRange(range);
-                            }
-                        }
-
-                        window.edited = true;
-                    }, function() {
-                        $wysiwyg.wysiwyg('shell').closePopup();
-                    }));
-                },
-                showstatic: true,
-                showselection: false
-            },
-            deleteJournalUpdatePane: {
-                title: 'Удалить журнальную плашку',
-                image: '<s>Ж</s>',
-                click: function($button) {
-                    var node = window.getSelection().getRangeAt(0).commonAncestorContainer;
-                    var $node = $(node);
-                    var $journalUpdate = $node.closest('.journal-update');
-                    if ($journalUpdate.length) {
-                        $journalUpdate.remove();
-                    } else {
-                        alert('Нет плашки для удаления');
-                    }
-                },
-                showstatic: false,
-                showselection: true
-            },
             insertfile: {
                 title: 'Сделать ссылкой на файл',
                 image: '\uf15b',
@@ -355,22 +295,13 @@ var makeWysisyg = function($wysiwyg) {
                 image: '\uf12d',
                 showstatic: false,
                 showselection: true
-            },
+            }
         },
         submit: {
             title: 'OK',
             image: '\uf00c'
         },
         onKeyPress: function(key, character, shiftKey, altKey, ctrlKey, metaKey) {
-            /*console.log({
-             key: key,
-             character: character,
-             shiftKey: shiftKey,
-             altKey: altKey,
-             ctrlKey: ctrlKey,
-             metaKey: metaKey
-             });
-             */
             if (typeof $wysiwyg.data('keyPressUserFunc') !== typeof undefined) {
                 $wysiwyg.data('keyPressUserFunc').apply(this, [key, character, shiftKey, altKey, ctrlKey, metaKey]);
             }
@@ -395,9 +326,6 @@ var makeWysisyg = function($wysiwyg) {
             } else if ((key == 13) && (!ctrlKey) && (!altKey) && (shiftKey) && (!metaKey)) {
                 placeHtmlAtCaret("<br />", false);
                 return false;
-                /*} else if ((key == 13) && (!ctrlKey) && (!altKey) && (shiftKey) && (!metaKey)) {
-                 wrapRootTextNodesIntoParagraphs($wysiwyg);
-                 return true;*/
             } else {
                 return true;
             }
