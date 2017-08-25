@@ -5,7 +5,7 @@ var uuid = require('uuid/v4');
 var popups = require('./wysiwyg-editor.customPopups');
 require('../css/wysiwyg-editor.css');
 
-var makeWysisyg = function($wysiwyg) {
+var makeWysisyg = function($wysiwyg, callbackWhenEdited) {
     var nextNode = function(node) {
         if (node.hasChildNodes()) {
             return node.firstChild;
@@ -58,19 +58,19 @@ var makeWysisyg = function($wysiwyg) {
     var wysiwygBold = function($wysiwyg) {
         $wysiwyg.wysiwyg('shell').bold();
         wysiwygReplaceTag($wysiwyg, "b", "strong");
-        window.edited = true;
+        callbackWhenEdited();
     };
 
     var wysiwygItalic = function($wysiwyg) {
         $wysiwyg.wysiwyg('shell').italic();
         wysiwygReplaceTag($wysiwyg, "i", "em");
-        window.edited = true;
+        callbackWhenEdited();
     };
 
     var wysiwygUnlink = function($wysiwyg) {
         document.execCommand('unlink', false, false);
         $wysiwyg.wysiwyg('shell').sync();
-        window.edited = true;
+        callbackWhenEdited();
     };
 
     var wysiwygReplaceTag = function($wysiwyg, oldSelector, newTag, processFunc) {
@@ -87,7 +87,7 @@ var makeWysisyg = function($wysiwyg) {
                 }
                 return $result;
             });
-        window.edited = true;
+        callbackWhenEdited();
     };
 
     // http://stackoverflow.com/a/6691294
@@ -223,7 +223,7 @@ var makeWysisyg = function($wysiwyg) {
                         if (target != "") {
                             $link.attr('target', target);
                         }
-                        window.edited = true;
+                        callbackWhenEdited();
                     }, function() {
                         $wysiwyg.wysiwyg('shell').closePopup();
                     }, oldHref, oldTarget));
@@ -258,7 +258,7 @@ var makeWysisyg = function($wysiwyg) {
 
                         $image.attr('src', src);
 
-                        window.edited = true;
+                        callbackWhenEdited();
                     }, function() {
                         $wysiwyg.wysiwyg('shell').closePopup();
                     }));
@@ -284,7 +284,7 @@ var makeWysisyg = function($wysiwyg) {
                         if (target != "") {
                             $link.attr('target', target);
                         }
-                        window.edited = true;
+                        callbackWhenEdited();
                     }, function() {
                         $wysiwyg.wysiwyg('shell').closePopup();
                     }));
@@ -308,7 +308,7 @@ var makeWysisyg = function($wysiwyg) {
                 $wysiwyg.data('keyPressUserFunc').apply(this, [key, character, shiftKey, altKey, ctrlKey, metaKey]);
             }
 
-            window.edited = true;
+            callbackWhenEdited();
 
             console.log({
                 key: key,
@@ -465,7 +465,7 @@ var makeWysisyg = function($wysiwyg) {
             document.selection.createRange().pasteHTML(html);
         }
 
-        window.edited = true;
+        callbackWhenEdited();
         e.preventDefault();
     });
 };
