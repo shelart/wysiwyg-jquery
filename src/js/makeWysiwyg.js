@@ -468,7 +468,9 @@ var makeWysisyg = function($wysiwyg, callbackWhenEdited) {
     });
 
     $wysiwyg.wysiwyg('container').on('keydown', function() {
-        callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
+        setTimeout(function () {
+            callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
+        }, 0);
     });
 };
 
