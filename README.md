@@ -27,7 +27,7 @@ Webpack 2 + jQuery
 This will register `window.$` and `window.jQuery` globals which will be used by the package.
 
 2. In your `webpack.config.js` add the following section:
-```js
+```javascript
 exports default {
     externals: {
         jquery: 'jQuery',
@@ -40,7 +40,7 @@ This will make Webpack 2 to rely on the global `window.jQuery` when it sees usag
 
 ### Method 2: if you'd like to pack jQuery with your bundle:
 In your `webpack.config.js` add the entry point:
-```js
+```javascript
 exports default {
     entry: [
         'jquery', // please ensure to install jQuery via NPM
@@ -55,7 +55,9 @@ exports default {
 
 How to use
 ==========
-```js
+```javascript
 import WysiwygJquery from 'wysiwyg-jquery';
-WysiwygJquery($('#editor'));
+WysiwygJquery($('#editor'), (newHTML) => {
+    // ...
+});
 ```
