@@ -58,19 +58,19 @@ var makeWysisyg = function($wysiwyg, callbackWhenEdited) {
     var wysiwygBold = function($wysiwyg) {
         $wysiwyg.wysiwyg('shell').bold();
         wysiwygReplaceTag($wysiwyg, "b", "strong");
-        callbackWhenEdited();
+        callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
     };
 
     var wysiwygItalic = function($wysiwyg) {
         $wysiwyg.wysiwyg('shell').italic();
         wysiwygReplaceTag($wysiwyg, "i", "em");
-        callbackWhenEdited();
+        callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
     };
 
     var wysiwygUnlink = function($wysiwyg) {
         document.execCommand('unlink', false, false);
         $wysiwyg.wysiwyg('shell').sync();
-        callbackWhenEdited();
+        callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
     };
 
     var wysiwygReplaceTag = function($wysiwyg, oldSelector, newTag, processFunc) {
@@ -87,7 +87,7 @@ var makeWysisyg = function($wysiwyg, callbackWhenEdited) {
                 }
                 return $result;
             });
-        callbackWhenEdited();
+        callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
     };
 
     // http://stackoverflow.com/a/6691294
@@ -223,7 +223,7 @@ var makeWysisyg = function($wysiwyg, callbackWhenEdited) {
                         if (target != "") {
                             $link.attr('target', target);
                         }
-                        callbackWhenEdited();
+                        callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
                     }, function() {
                         $wysiwyg.wysiwyg('shell').closePopup();
                     }, oldHref, oldTarget));
@@ -258,7 +258,7 @@ var makeWysisyg = function($wysiwyg, callbackWhenEdited) {
 
                         $image.attr('src', src);
 
-                        callbackWhenEdited();
+                        callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
                     }, function() {
                         $wysiwyg.wysiwyg('shell').closePopup();
                     }));
@@ -284,7 +284,7 @@ var makeWysisyg = function($wysiwyg, callbackWhenEdited) {
                         if (target != "") {
                             $link.attr('target', target);
                         }
-                        callbackWhenEdited();
+                        callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
                     }, function() {
                         $wysiwyg.wysiwyg('shell').closePopup();
                     }));
@@ -307,8 +307,6 @@ var makeWysisyg = function($wysiwyg, callbackWhenEdited) {
             if (typeof $wysiwyg.data('keyPressUserFunc') !== typeof undefined) {
                 $wysiwyg.data('keyPressUserFunc').apply(this, [key, character, shiftKey, altKey, ctrlKey, metaKey]);
             }
-
-            callbackWhenEdited();
 
             console.log({
                 key: key,
@@ -465,8 +463,12 @@ var makeWysisyg = function($wysiwyg, callbackWhenEdited) {
             document.selection.createRange().pasteHTML(html);
         }
 
-        callbackWhenEdited();
+        callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
         e.preventDefault();
+    });
+
+    $wysiwyg.wysiwyg('container').on('keydown', function() {
+        callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
     });
 };
 
