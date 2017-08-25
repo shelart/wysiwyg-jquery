@@ -58,6 +58,6 @@ How to use
 ```javascript
 import WysiwygJquery from 'wysiwyg-jquery';
 WysiwygJquery($('#editor'), (newHTML) => {
-    // ...
+    // callback is called whenever a WYSIWYG editor content is updated (keydown, bold etc.)
 });
 ```
