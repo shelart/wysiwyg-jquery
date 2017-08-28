@@ -57,7 +57,26 @@ How to use
 ==========
 ```javascript
 import WysiwygJquery from 'wysiwyg-jquery';
-WysiwygJquery($('#editor'), (newHTML) => {
-    // callback is called whenever a WYSIWYG editor content is updated (keydown, bold etc.)
-});
+WysiwygJquery($('#editor'), {
+    callbackWhenEdited: (newHTML) => {
+        // callback is called whenever a WYSIWYG editor content is updated (keydown, bold etc.)
+    },
+    buttons: {
+        customButtonKey: { // it's up to you how to name it; you can override default buttons with keys 'bold', 'insertlink', etc.
+            title: 'Your tooltip',
+            image: '\u0000', // Unicode of FA icon (http://fontawesome.io/cheatsheet/)
+            click: ($button) => {
+                // ...
+            },
+            popup: ($popup, $button) => {
+                const $modalWindow = $(); // generate the window as jQuery-collection
+                $popup.append($modalWindow); // open the popup
+                // Call $wysiwyg.wysiwyg('shell').closePopup(); to close the popup from the popup.
+                // You can pass $wysiwyg to the modal generation function, for instance
+            },
+            showstatic: true, // show on the toolbar
+            showselection: false, // do not show on the popup toolbar when text selected
+        },
+    },
+);
 ```
