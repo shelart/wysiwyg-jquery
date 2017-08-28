@@ -5,7 +5,178 @@ var uuid = require('uuid/v4');
 var popups = require('./wysiwyg-editor.customPopups');
 require('../css/wysiwyg-editor.css');
 
-var makeWysisyg = function($wysiwyg, callbackWhenEdited) {
+var makeWysisyg = function($wysiwyg, options) {
+    var callbackWhenEdited = function (newHTML) {};
+
+    if (typeof options.callbackWhenEdited === typeof Function) {
+        callbackWhenEdited = options.callbackWhenEdited;
+    }
+
+    var defaultButtons = {
+        bold: {
+            title: 'Полужирный (Ctrl+B)',
+            image: '\uf032',
+            click: function($button) {
+                wysiwygBold($wysiwyg);
+            },
+            showstatic: true,
+            showselection: true
+        },
+        italic: {
+            title: 'Курсив (Ctrl+I)',
+            image: '\uf033',
+            click: function($button) {
+                wysiwygItalic($wysiwyg);
+            },
+            showstatic: true,
+            showselection: true
+        },
+        forecolor: {
+            title: 'Цвет текста',
+            image: '\uf1fc',
+            popup: function($popup, $button) {
+                $popup.append(popups.openColorPalette(function(color) {
+                    $wysiwyg.wysiwyg('shell').forecolor(color).closePopup().collapseSelection();
+                    wysiwygReplaceTag($wysiwyg, "font[color]", "span", function($result) {
+                        $result.css('color', color);
+                    });
+                }));
+            },
+            showstatic: true,
+            showselection: true
+        },
+        insertlink: {
+            title: 'Преобразовать в ссылку',
+            image: '\uf0c1',
+            popup: function($popup, $button) {
+                var selectedNodes = getSelectedNodes();
+
+                var $selectedNodes = [];
+                $.each(selectedNodes, function(idx, node) {
+                    $selectedNodes[$selectedNodes.length] = $(node);
+                });
+                $selectedNodes = $($selectedNodes).map(function() {
+                    return this.toArray();
+                });
+
+                var $oldLink = $selectedNodes.closest("a");
+                var oldHref, oldTarget;
+                if ($oldLink.length) {
+                    oldHref = $oldLink.attr('href');
+                    oldTarget = $oldLink.attr('target');
+                } else {
+                    console.log($selectedNodes);
+                    var $oldImg = $selectedNodes.find("img");
+                    if ($oldImg.length) {
+                        oldHref = $oldImg.attr('src');
+                        oldTarget = "_blank";
+                    }
+                }
+
+                if (typeof oldHref === typeof undefined) {
+                    oldHref = "";
+                }
+
+                if (typeof oldTarget === typeof undefined) {
+                    oldTarget = "";
+                }
+
+                $popup.append(popups.openLinkConverter(function(href, target) {
+                    var dummyHref;
+                    do {
+                        dummyHref = uuid();
+                    } while ($wysiwyg.wysiwyg('container').find("a[href='" + dummyHref + "']").length);
+
+                    $wysiwyg.wysiwyg('shell').insertLink(dummyHref).closePopup();
+                    var $link = $wysiwyg
+                        .wysiwyg('container')
+                        .find("a[href='" + dummyHref + "']");
+                    $link.attr('href', href);
+                    if (target != "") {
+                        $link.attr('target', target);
+                    }
+                    callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
+                }, function() {
+                    $wysiwyg.wysiwyg('shell').closePopup();
+                }, oldHref, oldTarget));
+            },
+            showstatic: false,
+            showselection: true
+        },
+        unlink: {
+            title: 'Удалить ссылку',
+            image: '\uf127',
+            click: function($button) {
+                wysiwygUnlink($wysiwyg);
+            },
+            showstatic: false,
+            showselection: true
+        },
+        insertimage: {
+            title: 'Вставить картинку',
+            image: '\uf030',
+            popup: function($popup, $button) {
+                $popup.append(popups.openImageInserter(function(src) {
+                    var dummySrc;
+                    do {
+                        dummySrc = uuid();
+                    } while ($wysiwyg.wysiwyg('container').find("img[src='" + dummySrc + "']").length);
+
+                    $wysiwyg.wysiwyg('shell').insertImage(dummySrc).closePopup();
+
+                    var $image = $wysiwyg
+                        .wysiwyg('container')
+                        .find("img[src='" + dummySrc + "']");
+
+                    $image.attr('src', src);
+
+                    callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
+                }, function() {
+                    $wysiwyg.wysiwyg('shell').closePopup();
+                }));
+            },
+            showstatic: true,
+            showselection: false
+        },
+        insertfile: {
+            title: 'Сделать ссылкой на файл',
+            image: '\uf15b',
+            popup: function($popup, $button) {
+                $popup.append(popups.openFileLinkMaker(function(href, target) {
+                    var dummyHref;
+                    do {
+                        dummyHref = uuid();
+                    } while ($wysiwyg.wysiwyg('container').find("a[href='" + dummyHref + "']").length);
+
+                    $wysiwyg.wysiwyg('shell').insertLink(dummyHref).closePopup();
+                    var $link = $wysiwyg
+                        .wysiwyg('container')
+                        .find("a[href='" + dummyHref + "']");
+                    $link.attr('href', href);
+                    if (target != "") {
+                        $link.attr('target', target);
+                    }
+                    callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
+                }, function() {
+                    $wysiwyg.wysiwyg('shell').closePopup();
+                }));
+            },
+            showstatic: false,
+            showselection: true
+        },
+        removeformat: {
+            title: 'Сбросить форматирование',
+            image: '\uf12d',
+            showstatic: false,
+            showselection: true
+        }
+    };
+
+    var buttons = defaultButtons;
+    if (typeof options.buttons === typeof {}) {
+        buttons = $.extend({}, defaultButtons, options.buttons);
+    }
+
     var nextNode = function(node) {
         if (node.hasChildNodes()) {
             return node.firstChild;
@@ -140,165 +311,7 @@ var makeWysisyg = function($wysiwyg, callbackWhenEdited) {
 
     $wysiwyg.wysiwyg({
         toolbar: "top-selection",
-        buttons: {
-            bold: {
-                title: 'Полужирный (Ctrl+B)',
-                image: '\uf032',
-                click: function($button) {
-                    wysiwygBold($wysiwyg);
-                },
-                showstatic: true,
-                showselection: true
-            },
-            italic: {
-                title: 'Курсив (Ctrl+I)',
-                image: '\uf033',
-                click: function($button) {
-                    wysiwygItalic($wysiwyg);
-                },
-                showstatic: true,
-                showselection: true
-            },
-            forecolor: {
-                title: 'Цвет текста',
-                image: '\uf1fc',
-                popup: function($popup, $button) {
-                    $popup.append(popups.openColorPalette(function(color) {
-                        $wysiwyg.wysiwyg('shell').forecolor(color).closePopup().collapseSelection();
-                        wysiwygReplaceTag($wysiwyg, "font[color]", "span", function($result) {
-                            $result.css('color', color);
-                        });
-                    }));
-                },
-                showstatic: true,
-                showselection: true
-            },
-            insertlink: {
-                title: 'Преобразовать в ссылку',
-                image: '\uf0c1',
-                popup: function($popup, $button) {
-                    var selectedNodes = getSelectedNodes();
-
-                    var $selectedNodes = [];
-                    $.each(selectedNodes, function(idx, node) {
-                        $selectedNodes[$selectedNodes.length] = $(node);
-                    });
-                    $selectedNodes = $($selectedNodes).map(function() {
-                        return this.toArray();
-                    });
-
-                    var $oldLink = $selectedNodes.closest("a");
-                    var oldHref, oldTarget;
-                    if ($oldLink.length) {
-                        oldHref = $oldLink.attr('href');
-                        oldTarget = $oldLink.attr('target');
-                    } else {
-                        console.log($selectedNodes);
-                        var $oldImg = $selectedNodes.find("img");
-                        if ($oldImg.length) {
-                            oldHref = $oldImg.attr('src');
-                            oldTarget = "_blank";
-                        }
-                    }
-
-                    if (typeof oldHref === typeof undefined) {
-                        oldHref = "";
-                    }
-
-                    if (typeof oldTarget === typeof undefined) {
-                        oldTarget = "";
-                    }
-
-                    $popup.append(popups.openLinkConverter(function(href, target) {
-                        var dummyHref;
-                        do {
-                            dummyHref = uuid();
-                        } while ($wysiwyg.wysiwyg('container').find("a[href='" + dummyHref + "']").length);
-
-                        $wysiwyg.wysiwyg('shell').insertLink(dummyHref).closePopup();
-                        var $link = $wysiwyg
-                            .wysiwyg('container')
-                            .find("a[href='" + dummyHref + "']");
-                        $link.attr('href', href);
-                        if (target != "") {
-                            $link.attr('target', target);
-                        }
-                        callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
-                    }, function() {
-                        $wysiwyg.wysiwyg('shell').closePopup();
-                    }, oldHref, oldTarget));
-                },
-                showstatic: false,
-                showselection: true
-            },
-            unlink: {
-                title: 'Удалить ссылку',
-                image: '\uf127',
-                click: function($button) {
-                    wysiwygUnlink($wysiwyg);
-                },
-                showstatic: false,
-                showselection: true
-            },
-            insertimage: {
-                title: 'Вставить картинку',
-                image: '\uf030',
-                popup: function($popup, $button) {
-                    $popup.append(popups.openImageInserter(function(src) {
-                        var dummySrc;
-                        do {
-                            dummySrc = uuid();
-                        } while ($wysiwyg.wysiwyg('container').find("img[src='" + dummySrc + "']").length);
-
-                        $wysiwyg.wysiwyg('shell').insertImage(dummySrc).closePopup();
-
-                        var $image = $wysiwyg
-                            .wysiwyg('container')
-                            .find("img[src='" + dummySrc + "']");
-
-                        $image.attr('src', src);
-
-                        callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
-                    }, function() {
-                        $wysiwyg.wysiwyg('shell').closePopup();
-                    }));
-                },
-                showstatic: true,
-                showselection: false
-            },
-            insertfile: {
-                title: 'Сделать ссылкой на файл',
-                image: '\uf15b',
-                popup: function($popup, $button) {
-                    $popup.append(popups.openFileLinkMaker(function(href, target) {
-                        var dummyHref;
-                        do {
-                            dummyHref = uuid();
-                        } while ($wysiwyg.wysiwyg('container').find("a[href='" + dummyHref + "']").length);
-
-                        $wysiwyg.wysiwyg('shell').insertLink(dummyHref).closePopup();
-                        var $link = $wysiwyg
-                            .wysiwyg('container')
-                            .find("a[href='" + dummyHref + "']");
-                        $link.attr('href', href);
-                        if (target != "") {
-                            $link.attr('target', target);
-                        }
-                        callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
-                    }, function() {
-                        $wysiwyg.wysiwyg('shell').closePopup();
-                    }));
-                },
-                showstatic: false,
-                showselection: true
-            },
-            removeformat: {
-                title: 'Сбросить форматирование',
-                image: '\uf12d',
-                showstatic: false,
-                showselection: true
-            }
-        },
+        buttons: buttons,
         submit: {
             title: 'OK',
             image: '\uf00c'
