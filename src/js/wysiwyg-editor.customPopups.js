@@ -67,6 +67,38 @@ function openColorPalette(func) {
     return $content;
 }
 
+function openFontSizesList(func) {
+    // Hack: http://stackoverflow.com/questions/5868295/document-execcommand-fontsize-in-pixels/5870603#5870603
+    var list_fontsizes = [], i;
+    for (i = 8; i <= 11; ++i) {
+        list_fontsizes.push(i + 'px');
+    }
+    for (i = 12; i <= 28; i+=2) {
+        list_fontsizes.push(i + 'px');
+    }
+    list_fontsizes.push('36px');
+    list_fontsizes.push('48px');
+    list_fontsizes.push('72px');
+    var $list = $('<div/>')
+        .addClass('wysiwyg-plugin-list')
+        .attr('unselectable', 'on');
+    $.each(list_fontsizes, function(index, size) {
+        var $link = $('<a/>')
+            .attr('href', '#')
+            .html(size)
+            .click(function(event) {
+                func.apply(this, [size]);
+                // prevent link-href-#
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
+            });
+        $list.append($link);
+    });
+
+    return $list;
+}
+
 function openLinkConverter(funcOnSave, funcOnCancel, oldHref, oldTarget) {
     // http://bootsnipp.com/forms?version=3
     // http://www.htmlescape.net/stringescape_tool.html
@@ -494,6 +526,7 @@ function openImageInserter(funcOnSave, funcOnCancel) {
 module.exports = {
     HSVtoRGB: HSVtoRGB,
     openColorPalette: openColorPalette,
+    openFontSizesList: openFontSizesList,
     openLinkConverter: openLinkConverter,
     openFileLinkMaker: openFileLinkMaker,
     openImageInserter: openImageInserter

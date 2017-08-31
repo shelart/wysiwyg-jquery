@@ -45,6 +45,22 @@ var makeWysisyg = function($wysiwyg, options) {
             showstatic: true,
             showselection: true
         },
+        fontsize: {
+            title: 'Размер шрифта',
+            image: '\uf034',
+            popup: function($popup, $button) {
+                $popup.append(popups.openFontSizesList(function(size) {
+                    $wysiwyg.wysiwyg('shell').fontSize(7).closePopup();
+                    wysiwygReplaceTag($wysiwyg, "font[size=7]", "span", function($result) {
+                        $result.css('font-size', size);
+                    });
+
+                    callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
+                }));
+            },
+            showstatic: true,
+            showselection: true
+        },
         insertlink: {
             title: 'Преобразовать в ссылку',
             image: '\uf0c1',
