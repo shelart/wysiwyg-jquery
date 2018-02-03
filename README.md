@@ -96,3 +96,23 @@ A file is submitted via XMLHttpRequest (via `$.ajax()`) HTTP POST request as `mu
 On MSIE 9 a file will be submitted via `<form />` with `<input type="file" name="image" />` (or `<input type="file" name="file" />`) by invoking its `submit()` method targeted to a temporarily created `<iframe />`.
 
 The server must return a web path of uploaded file.
+
+#### Image Upload
+
+Among `image` field WYSIWYG editor also may submit the following fields:
+
+- `width` is user input of desired width (in pixels) of the image inside the page. It goes as `style="width: {width}px"` attribute of `<img />` tag.
+
+  **CAUTION:** the WYSIWYG editor does not filter user input anyway.
+
+- `height` is user input of desired height (in pixels) of the image inside the page. It goes as `style="height: {height}px"` attribute of `<img />` tag.
+
+  **NOTE**: this field will present in the form data **only if a user unchecks 'Keep aspect ratio'**.
+
+  **CAUTION:** the WYSIWYG editor does not filter user input anyway.
+
+The above fields are submitted **only if a user checks 'Optimize image'** which means the server should resize the uploaded image to desired dimensions.
+
+If `height` is missing the server should calculate appropriate height to keep aspect ratio.
+
+The server might ignore these fields (`width` & `height`). Anyway the WYSIWYG editor puts `<img />` with user set sizes. Of course it does mean other users will download a huger image which will cost them traffic.
