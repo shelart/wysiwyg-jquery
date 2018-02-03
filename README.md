@@ -87,11 +87,11 @@ WysiwygJquery($('#editor'), {
 
 This wrapper includes popups for file & image upload buttons in the WYSIWYG editor. These are written with Bootstrap 3. They should work out of box if your site uses Bootstrap 3. Unfortunately there is no way to customize them yet, but it is planned to add appropriate options, especially i18n dictionary option. Feel free to fork/pull request.
 
-To make the uploading work you should write a code on the server to deal with forms submitted by the editor.
+To make the upload routine work you should write a code on the server to deal with forms submitted by the editor.
 
 #### General Upload Principles
 
-A file is submitted via XMLHttpRequest (via `$.ajax()`) HTTP POST request as an HTML form.
+A file is submitted via XMLHttpRequest (via `$.ajax()`) HTTP POST request as `multipart/form-data`. The uploaded file will be contained in a field named `image` or `file`.
 
 On MSIE 9 a file will be submitted via `<form />` with `<input type="file" name="image" />` (or `<input type="file" name="file" />`) by invoking its `submit()` method targeted to a temporarily created `<iframe />`.
 
