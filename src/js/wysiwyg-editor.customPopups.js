@@ -420,6 +420,45 @@ function openImageInserter(funcOnSave, funcOnCancel, imageUploadUrl) {
         '                </div>',
         '',
         '                <div class="form-group">',
+        '                    <label class="col-md-3 control-label" for="width">Размеры</label>',
+        '                    <div class="col-md-9">',
+        '                        <div class="input-group">',
+        '                            <input name="width" class="form-control" type="text" value="400" /><!--',
+        '                            --><span class="input-group-addon"><!--',
+        '                                -->x<!--',
+        '                            --></span><!--',
+        '                            --><input name="height" class="form-control" type="text" disabled /><!--',
+        '                            --><span class="input-group-addon">',
+        '                                <label for="autoHeight">',
+        '                                    <input type="checkbox" id="autoHeight" name="autoHeight" checked />',
+        '                                    Сохранить пропорции',
+        '                                </label>',
+        '                            </span>',
+        '                        </div>',
+        '                    </div>',
+        '                </div>',
+        '',
+        '                <div class="form-group">',
+        '                    <label class="col-md-3 control-label" for="optimization"></label>',
+        '                    <div class="col-md-9">',
+        '                        <label for="optimization">',
+        '                            <input type="checkbox" name="optimization" id="optimization" />',
+        '                            Оптимизировать',
+        '                        </label>',
+        '                    </div>',
+        '                </div>',
+        '',
+        '                <div class="form-group">',
+        '                    <label class="col-md-3 control-label" for="wrapByLink"></label>',
+        '                    <div class="col-md-9">',
+        '                        <label for="wrapByLink">',
+        '                            <input type="checkbox" name="wrapByLink" id="wrapByLink" />',
+        '                            Открывать в новом окне',
+        '                        </label>',
+        '                    </div>',
+        '                </div>',
+        '',
+        '                <div class="form-group">',
         '                    <label class="col-md-3 control-label" for="btnInsert"></label>',
         '                    <div class="col-md-9">',
         '                        <button name="btnInsert" class="btn btn-danger" data-loading-text="<i class=\'fa fa-spin fa-spinner\'></i> Загрузка...">Вставить</button>',
@@ -435,15 +474,37 @@ function openImageInserter(funcOnSave, funcOnCancel, imageUploadUrl) {
 
     var $form = $(formHtml);
     var $inputUpload = $form.find("[name='image']");
+    var $width = $form.find("[name='width']");
+    var $height = $form.find("[name='height']");
+    var $autoHeight = $form.find("[name='autoHeight']");
+    var $optimization = $form.find("[name='optimization']");
+    var $wrapByLink = $form.find("[name='wrapByLink']");
     var $btnInsert = $form.find("[name='btnInsert']");
 
     $inputUpload.change(function() {
         $form.find("[name='fileName']").val($inputUpload.val());
     });
 
+    $autoHeight.click(function() {
+        $height.prop('disabled', $autoHeight.is(':checked'));
+    });
+
     $btnInsert.click(function(e) {
         e.preventDefault();
         e.stopPropagation();
+
+        var width, height;
+
+        width = $width.val();
+        height = $height.val();
+
+        var $optimizationChosen = $form.find("[name='optimization']:checked");
+
+        if ($autoHeight.is(':checked')) {
+            height = 0;
+        }
+
+        var openInNewTab = $wrapByLink.prop('checked');
 
         var ie9Upload = function() {
             //alert("Браузер не поддерживает HTML5/FormData. Будет использоваться аварийное решение.");
@@ -453,13 +514,18 @@ function openImageInserter(funcOnSave, funcOnCancel, imageUploadUrl) {
             var followUpOnIE9Upload = function($tempIframe) {
                 var result = $tempIframe.contents().find("body").html();
                 $tempIframe.remove();
+                if ($autoHeight.is(':checked')) {
+                    height = 0;
+                } else {
+                    height += 'px';
+                }
 
                 // handle errors
                 if (result == "Wrong file extension.") {
                     alert("Неправильное расширение файла.");
                     $btnInsert.button('reset');
                 } else {
-                    funcOnSave.apply(this, [result]);
+                    funcOnSave.apply(this, [result, width + 'px', height, openInNewTab]);
                 }
             };
 
@@ -473,6 +539,22 @@ function openImageInserter(funcOnSave, funcOnCancel, imageUploadUrl) {
             $form.attr('target', $tempIframe.attr('name'));
             $form.attr('name', "IE9FileUploadingForm");
             $form.attr('acceptCharset', "UTF-8");
+
+            if ($optimizationChosen.val() == "1") {
+                var $inputWidth = $("<input />");
+                $inputWidth.attr('name', "width");
+                $inputWidth.attr('type', "hidden");
+                $inputWidth.val(width);
+                $inputWidth.appendTo($form);
+
+                if (!$autoHeight.is(':checked')) {
+                    var $inputHeight = $("<input />");
+                    $inputHeight.attr('name', "height");
+                    $inputHeight.attr('type', "hidden");
+                    $inputHeight.val(height);
+                    $inputHeight.appendTo($form);
+                }
+            }
 
             $tempIframe.get()[0].onload = followUpOnIE9Upload.bind(this, $tempIframe);
             var $container = $form.closest(".blackout");
@@ -488,6 +570,13 @@ function openImageInserter(funcOnSave, funcOnCancel, imageUploadUrl) {
             if (typeof formData !== typeof undefined) {
                 formData.append('image', $inputUpload.get()[0].files.item(0));
 
+                if ($optimizationChosen.is(':checked')) {
+                    formData.append('width', width);
+                    if (!$autoHeight.is(':checked')) {
+                        formData.append('height', height);
+                    }
+                }
+
                 $.ajax({
                     type: "POST",
                     url: imageUploadUrl,
@@ -499,12 +588,18 @@ function openImageInserter(funcOnSave, funcOnCancel, imageUploadUrl) {
                         console.log(result);
                         console.log(status);
 
+                        if ($autoHeight.is(':checked')) {
+                            height = 0;
+                        } else {
+                            height += 'px';
+                        }
+
                         // handle errors
                         if (result == "Wrong file extension.") {
                             alert("Неправильное расширение файла.");
                             $btnInsert.button('reset');
                         } else {
-                            funcOnSave.apply(this, [result]);
+                            funcOnSave.apply(this, [result, width + 'px', height, openInNewTab]);
                         }
                     },
                     error: function (xhr, status, errorText) {

@@ -132,7 +132,7 @@ var makeWysisyg = function($wysiwyg, options) {
             title: 'Вставить картинку',
             image: '\uf030',
             popup: function($popup, $button) {
-                $popup.append(popups.openImageInserter(function(src) {
+                $popup.append(popups.openImageInserter(function(src, width, height, openInNewTab) {
                     var dummySrc;
                     do {
                         dummySrc = uuid();
@@ -144,7 +144,22 @@ var makeWysisyg = function($wysiwyg, options) {
                         .wysiwyg('container')
                         .find("img[src='" + dummySrc + "']");
 
-                    $image.attr('src', src);
+                    if (openInNewTab) {
+                        wysiwygReplaceTag($wysiwyg, "img[src='" + dummySrc + "']", "a", function($a) {
+                            console.log($a);
+                            $a.attr('href', src);
+                            $a.attr('target', "_blank");
+                            $a.html("<img src='" + dummySrc + "' />");
+                            $image = $a.find("img");
+                        });
+                    }
+
+                    $image
+                        .attr('src', src)
+                        .css('width', width);
+                    if (height) {
+                        $image.css('height', height);
+                    }
 
                     callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
                 }, function() {
