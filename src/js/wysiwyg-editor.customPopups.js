@@ -187,9 +187,13 @@ function openLinkConverter(funcOnSave, funcOnCancel, oldHref, oldTarget) {
     return $form;
 }
 
-function openFileLinkMaker(funcOnSave, funcOnCancel) {
+function openFileLinkMaker(funcOnSave, funcOnCancel, fileUploadUrl) {
     // http://bootsnipp.com/forms?version=3
     // http://www.htmlescape.net/stringescape_tool.html
+
+    if (typeof fileUploadUrl === typeof undefined) {
+        fileUploadUrl = '/upload/file';
+    }
 
     var formHtml = [
         '<div style="position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.5); display: table; z-index: 999" class="blackout">',
@@ -306,7 +310,7 @@ function openFileLinkMaker(funcOnSave, funcOnCancel) {
             var $tempIframe = $("<iframe />");
             $tempIframe.css('display', "none").attr('name', "tempFrameForIE9FileUploadingByAjax");
             var $form = $inputUpload.closest("form");
-            $form.attr('action', "/upload/file");
+            $form.attr('action', fileUploadUrl);
             $form.attr('method', "POST");
             $form.attr('enctype', "multipart/form-data");
             $form.attr('encoding', "multipart/form-data");
@@ -329,7 +333,7 @@ function openFileLinkMaker(funcOnSave, funcOnCancel) {
 
                 $.ajax({
                     type: "POST",
-                    url: "/upload/file",
+                    url: fileUploadUrl,
                     data: formData,
                     dataType: 'text',
                     contentType: false,
@@ -365,9 +369,13 @@ function openFileLinkMaker(funcOnSave, funcOnCancel) {
     return $form;
 }
 
-function openImageInserter(funcOnSave, funcOnCancel) {
+function openImageInserter(funcOnSave, funcOnCancel, imageUploadUrl) {
     // http://bootsnipp.com/forms?version=3
     // http://www.htmlescape.net/stringescape_tool.html
+
+    if (typeof imageUploadUrl === typeof undefined) {
+        imageUploadUrl = '/upload/image';
+    }
 
     var formHtml = [
         '<div style="position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.5); display: table; z-index: 999" class="blackout">',
@@ -458,7 +466,7 @@ function openImageInserter(funcOnSave, funcOnCancel) {
             var $tempIframe = $("<iframe />");
             $tempIframe.css('display', "none").attr('name', "tempFrameForIE9FileUploadingByAjax");
             var $form = $inputUpload.closest("form");
-            $form.attr('action', "/upload/image");
+            $form.attr('action', imageUploadUrl);
             $form.attr('method', "POST");
             $form.attr('enctype', "multipart/form-data");
             $form.attr('encoding', "multipart/form-data");
@@ -482,7 +490,7 @@ function openImageInserter(funcOnSave, funcOnCancel) {
 
                 $.ajax({
                     type: "POST",
-                    url: "/upload/image",
+                    url: imageUploadUrl,
                     data: formData,
                     dataType: 'text',
                     contentType: false,

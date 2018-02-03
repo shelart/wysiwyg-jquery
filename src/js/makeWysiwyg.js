@@ -149,7 +149,7 @@ var makeWysisyg = function($wysiwyg, options) {
                     callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
                 }, function() {
                     $wysiwyg.wysiwyg('shell').closePopup();
-                }));
+                }), options.imageUploadUrl);
             },
             showstatic: true,
             showselection: false
@@ -175,7 +175,7 @@ var makeWysisyg = function($wysiwyg, options) {
                     callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
                 }, function() {
                     $wysiwyg.wysiwyg('shell').closePopup();
-                }));
+                }), options.fileUploadUrl);
             },
             showstatic: false,
             showselection: true
