@@ -78,6 +78,7 @@ WysiwygJquery($('#editor'), {
             showselection: false, // do not show on the popup toolbar when text selected
         },
     },
+    removeButtons: ['fontsize', 'forecolor'], // drop default buttons
     imageUploadUrl: '/upload/image',
     fileUploadUrl: '/upload/file',
 );
