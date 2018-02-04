@@ -12,6 +12,10 @@ var makeWysisyg = function($wysiwyg, options) {
         callbackWhenEdited = options.callbackWhenEdited;
     }
 
+    if (typeof options.removeButtons.forEach !== typeof Function) {
+        options.removeButtons = [];
+    }
+
     var defaultButtons = {
         bold: {
             title: 'Полужирный (Ctrl+B)',
@@ -207,6 +211,10 @@ var makeWysisyg = function($wysiwyg, options) {
     if (typeof options.buttons === typeof {}) {
         buttons = $.extend({}, defaultButtons, options.buttons);
     }
+
+    options.removeButtons.forEach(function(btnName) {
+        delete buttons[btnName];
+    });
 
     var nextNode = function(node) {
         if (node.hasChildNodes()) {
