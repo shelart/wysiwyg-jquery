@@ -519,7 +519,12 @@ var makeWysisyg = function($wysiwyg, options) {
         e.preventDefault();
     });
 
-    $wysiwyg.wysiwyg('container').on('keydown', function() {
+    $wysiwyg.wysiwyg('container').on('keydown', function(e) {
+        if (e.originalEvent.ctrlKey && (e.originalEvent.key === 'z')) {
+            e.preventDefault();
+            return false;
+        }
+
         setTimeout(function () {
             callbackWhenEdited($wysiwyg.wysiwyg('shell').getHTML());
         }, 0);
